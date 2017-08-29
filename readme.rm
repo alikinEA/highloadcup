@@ -5,13 +5,3 @@ docker run -p 8888:80 --name highloadcup -t highloadcup --force-rm=true
 
 docker tag highloadcup stor.highloadcup.ru/travels/cute_puma
 docker push stor.highloadcup.ru/travels/cute_puma
-
-FROM frolvlad/alpine-oraclejdk8:slim
-VOLUME /tmp
-ADD /target/highloadcup.jar highloadcup.jar
-COPY locations_1.json /mnt/highloaddata/locations_1.json
-COPY users_1.json /mnt/highloaddata/users_1.json
-COPY visits_1.json /mnt/highloaddata/visits_1.json
-RUN sh -c 'touch /highloadcup.jar'
-ENV JAVA_OPTS=""
-ENTRYPOINT [ "sh", "-c", "java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar /highloadcup.jar" ]
