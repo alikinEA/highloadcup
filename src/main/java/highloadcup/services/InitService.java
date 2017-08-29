@@ -51,7 +51,7 @@ public class InitService {
                 e.printStackTrace();
             }
 
-            System.out.println("Version 8.0(100/800)");
+            System.out.println("Version 9.0(125/1000) gc1");
             ZipFile zipFile = new ZipFile(dataPath + "data.zip");
             zipFile.getFileHeaders().stream().forEach(item -> {
                 if (item != null) {
