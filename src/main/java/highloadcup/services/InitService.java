@@ -18,6 +18,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.InputStreamReader;
+import java.text.NumberFormat;
 
 /**
  * Created by Alikin E.A. on 25.08.17.
@@ -51,7 +52,21 @@ public class InitService {
                 e.printStackTrace();
             }
 
-            System.out.println("Version 9.0(125/1000) gc1");
+            System.out.println("Version 14.0(4/1000) -Xmx4g -Xms4g -server -XX:+AggressiveOpts ");
+            Runtime runtime = Runtime.getRuntime();
+            final NumberFormat format = NumberFormat.getInstance();
+            final long maxMemory = runtime.maxMemory();
+            final long allocatedMemory = runtime.totalMemory();
+            final long freeMemory = runtime.freeMemory();
+            final long mb = 1024 * 1024;
+            final String mega = "MB";
+            System.out.println("========================== Memory Info ==========================");
+            System.out.println("Free memory: " + format.format(freeMemory / mb) + mega);
+            System.out.println("Allocated memory: " + format.format(allocatedMemory / mb) + mega);
+            System.out.println("Max memory: " + format.format(maxMemory / mb) + mega);
+            System.out.println("Total free memory: " + format.format(freeMemory+(maxMemory - allocatedMemory)/mb)  + mega);
+            System.out.println("=================================================================\n");
+
             ZipFile zipFile = new ZipFile(dataPath + "data.zip");
             zipFile.getFileHeaders().stream().forEach(item -> {
                 if (item != null) {

@@ -104,7 +104,7 @@ public class LocationsResource implements GenericResource<Location>{
         }
         Location location = repository.getById(id);
         if (location != null) {
-            return new ResponseEntity<>(/*locationService.average(location,fromDate,fromAge,toDate,toAge,gender), */HttpStatus.OK);
+            return new ResponseEntity<>(locationService.average(location,fromDate,fromAge,toDate,toAge,gender), HttpStatus.OK);
         } else {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }

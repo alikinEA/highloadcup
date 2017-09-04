@@ -53,12 +53,12 @@ public class UsersResource implements GenericResource<User> {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
         if (user != null) {
-            return new ResponseEntity<>(/*visitsRepository.getVisitsByUser(user.getId()
+            return new ResponseEntity<>(visitsRepository.getVisitsByUser(user.getId()
                     ,fromDate
                     ,toDate
                     ,country
                     ,toDistance
-            ),*/ HttpStatus.OK);
+            ), HttpStatus.OK);
         } else {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
