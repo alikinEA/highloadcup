@@ -1,5 +1,6 @@
 package highloadcup.repository;
 
+import highloadcup.models.Location;
 import highloadcup.models.Visit;
 import highloadcup.models.response.VisitResp;
 import highloadcup.models.response.VisitsResp;
@@ -33,17 +34,18 @@ public class VisitsRepository extends GenericRepository<Visit>{
                 if (!(v.getVisited_at() < toDate))
                     isValid =  false;
             }
+            Location location = locationsRepository.getById(v.getLocation());
             if (country != null ) {
-                if (!(country.equals(locationsRepository.getById(v.getLocation()).getCountry())))
+                if (!(country.equals(location.getCountry())))
                     isValid =  false;
             }
             if (toDistance != null ) {
-                if (!(toDistance > locationsRepository.getById(v.getLocation()).getDistance())) {
+                if (!(toDistance > location.getDistance())) {
                     isValid =  false;
                 }
             }
             if (v.getUser().equals(id) && isValid) {
-                visitRespList.add(new VisitResp(v.getMark(),v.getVisited_at(),locationsRepository.getById(v.getLocation()).getPlace()));
+                visitRespList.add(new VisitResp(v.getMark(),v.getVisited_at(),location.getPlace()));
             }
         });
         visitRespList.sort(Comparator.comparingInt(VisitResp::getVisited_at));

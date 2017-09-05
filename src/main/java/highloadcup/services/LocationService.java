@@ -1,6 +1,7 @@
 package highloadcup.services;
 
 import highloadcup.models.Location;
+import highloadcup.models.User;
 import highloadcup.models.Visit;
 import highloadcup.models.response.AverageResp;
 import highloadcup.repository.UsersRepository;
@@ -41,7 +42,7 @@ public class LocationService {
         List<Visit> visits = visitsRepository.getVisitsByLocation(location.getId());
         if (visits.size() != 0) {
             OptionalDouble optionalDouble = visits
-                    .stream().filter(item -> {
+                    .parallelStream().filter(item -> {
                 if (fromDate != null) {
                     if (!(item.getVisited_at() > fromDate)) {
                         return false;
@@ -52,24 +53,26 @@ public class LocationService {
                         return false;
                     }
                 }
-                if (fromAge != null) {
-                   // System.out.println("param = " +new Date(getTimeFromYear(fromAge)) + " birth = " + new Date(usersRepository.getById(item.getUser()).getBirth_date()) + "isNeed= " + (new Date(getTimeFromYear(fromAge)).after(new Date(usersRepository.getById(item.getUser()).getBirth_date()))) );
-                    if (!(getTimeFromYear(fromAge) > (usersRepository.getById(item.getUser()).getBirth_date())*1000)) {
-                        return false;
+                if (fromAge != null || toAge != null || gender != null) {
+                    User user = usersRepository.getById(item.getUser());
+                    Long old = user.getBirth_date()*1000;
+                    if (fromAge != null) {
+                        if (!(getTimeFromYear(fromAge) > old)) {
+                            return false;
+                        }
+                    }
+                    if (toAge != null) {
+                        if (!(getTimeFromYear(toAge) < old)) {
+                            return false;
+                        }
+                    }
+                    if (gender != null) {
+                        if (!gender.equals(user.getGender())) {
+                            return false;
+                        }
                     }
                 }
-                if (toAge != null) {
 
-                    //System.out.println("param = " +new Date(getTimeFromYear(toAge)) + " birth = " + new Date(usersRepository.getById(item.getUser()).getBirth_date() * 1000));
-                    if (!(getTimeFromYear(toAge) < (usersRepository.getById(item.getUser()).getBirth_date()*1000))) {
-                        return false;
-                    }
-                }
-                if (gender != null) {
-                    if (!gender.equals(usersRepository.getById(item.getUser()).getGender())) {
-                        return false;
-                    }
-                }
                 return true;
             })
                     .mapToInt(Visit::getMark).average();
@@ -83,34 +86,12 @@ public class LocationService {
         }
 
     }
-    private Integer getYear(Long bithday) {
-
-        LocalDate birthdate =
-                Instant.ofEpochMilli(bithday).atZone(ZoneId.systemDefault()).toLocalDate();
-        LocalDate now =
-                Instant.ofEpochMilli(new Date().getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
-        Period period =Period.between(birthdate, now);
-        return period.getYears();
-    }
 
     private Long getTimeFromYear(Integer year) {
         Calendar cal= GregorianCalendar.getInstance();
         cal.setTimeInMillis(initService.getCurrentTimeStamp());
-        /*cal.set(Calendar.HOUR,0);
-        cal.set(Calendar.MINUTE,0);
-        cal.set(Calendar.SECOND,0);*/
         cal.add(Calendar.YEAR, -year);
         return cal.getTimeInMillis();
     }
 
-    private Integer calc(long userBirth) {
-        userBirth = userBirth * 1000;
-        Integer age = 0;
-        Long curr = initService.getCurrentTimeStamp();
-        while (curr > userBirth) {
-            curr = curr - 31536000000l;
-            age++;
-        }
-        return age;
-    }
 }
