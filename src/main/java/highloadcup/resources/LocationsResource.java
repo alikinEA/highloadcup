@@ -31,11 +31,8 @@ public class LocationsResource implements GenericResource<Location>{
 
     @RequestMapping("locations/{id}")
     public ResponseEntity get(@PathVariable(value="id") String id ,HttpServletRequest request) {
-        if (!id.chars().allMatch(Character::isDigit)) {
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
-        }
         Location location = repository.getById(Integer.valueOf(id));
-        if (location != null && request.getRequestURI().replace("/locations/","").chars().allMatch(Character::isDigit)) {
+        if (location != null) {
             return new ResponseEntity<>(location, HttpStatus.OK);
         } else {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
@@ -51,13 +48,17 @@ public class LocationsResource implements GenericResource<Location>{
         if (location.getId() == null
                 || location.getCity() == null
                 || location.getCountry() == null
-                || repository.getById(location.getId()) !=null
                 || location.getDistance() == null
                 || location.getPlace() == null) {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        } else {
+            if (repository.getById(location.getId()) !=null) {
+                return new ResponseEntity(HttpStatus.BAD_REQUEST);
+            } else {
+                repository.put(location);
+                return new ResponseEntity<>(new Empty(), HttpStatus.OK);
+            }
         }
-        repository.put(location);
-        return new ResponseEntity<>(new Empty(), HttpStatus.OK);
     }
 
     @RequestMapping(value = "locations/{id}" , method = RequestMethod.POST)
@@ -104,7 +105,7 @@ public class LocationsResource implements GenericResource<Location>{
         }
         Location location = repository.getById(id);
         if (location != null) {
-            return new ResponseEntity<>(locationService.average(location,fromDate,fromAge,toDate,toAge,gender), HttpStatus.OK);
+            return new ResponseEntity<>(/*locationService.average(location,fromDate,fromAge,toDate,toAge,gender), */HttpStatus.OK);
         } else {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }

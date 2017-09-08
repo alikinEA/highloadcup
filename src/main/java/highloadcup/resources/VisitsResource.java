@@ -24,11 +24,8 @@ public class VisitsResource implements GenericResource<Visit> {
 
     @RequestMapping("visits/{id}")
     public ResponseEntity get(@PathVariable(value="id") String id ,HttpServletRequest request) {
-        if (!id.chars().allMatch(Character::isDigit)) {
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
-        }
         Visit visit = repository.getById(Integer.valueOf(id));
-        if (visit != null && request.getRequestURI().replace("/visits/", "").chars().allMatch(Character::isDigit)) {
+        if (visit != null) {
             return new ResponseEntity<>(visit, HttpStatus.OK);
         } else {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
@@ -44,13 +41,17 @@ public class VisitsResource implements GenericResource<Visit> {
         if (visit.getId() == null
                 || visit.getUser() == null
                 || visit.getLocation() == null
-                || repository.getById(visit.getId()) !=null
                 || visit.getMark() == null
                 || visit.getVisited_at() == null) {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        } else {
+            if (repository.getById(visit.getId()) !=null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            } else {
+                repository.put(visit);
+                return new ResponseEntity<>(new Empty(), HttpStatus.OK);
+            }
         }
-        repository.put(visit);
-        return new ResponseEntity<>(new Empty(), HttpStatus.OK);
     }
 
     @RequestMapping(value = "visits/{id}" , method = RequestMethod.POST)

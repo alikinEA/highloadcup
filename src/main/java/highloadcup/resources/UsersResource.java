@@ -30,11 +30,8 @@ public class UsersResource implements GenericResource<User> {
 
     @RequestMapping("users/{id}")
     public ResponseEntity get(@PathVariable(value = "id") String id, HttpServletRequest request) {
-        if (!id.chars().allMatch(Character::isDigit)) {
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
-        }
         User user = repository.getById(Integer.valueOf(id));
-        if (user != null && request.getRequestURI().replace("/users/","").chars().allMatch(Character::isDigit)) {
+        if (user != null) {
             return new ResponseEntity<>(user, HttpStatus.OK);
         } else {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
@@ -53,12 +50,12 @@ public class UsersResource implements GenericResource<User> {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
         if (user != null) {
-            return new ResponseEntity<>(visitsRepository.getVisitsByUser(user.getId()
+            return new ResponseEntity<>(/*visitsRepository.getVisitsByUser(user.getId()
                     ,fromDate
                     ,toDate
                     ,country
                     ,toDistance
-            ), HttpStatus.OK);
+            ),*/ HttpStatus.OK);
         } else {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
@@ -73,14 +70,19 @@ public class UsersResource implements GenericResource<User> {
         if (user.getId() == null
                 || user.getBirth_date() == null
                 || user.getEmail() == null
-                || repository.getById(user.getId()) !=null
                 || user.getFirst_name() == null
                 || user.getGender() == null
                 || user.getLast_name() == null) {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        } else {
+            if (repository.getById(user.getId()) !=null) {
+                return new ResponseEntity(HttpStatus.BAD_REQUEST);
+            } else {
+                repository.put(user);
+                return new ResponseEntity<>(new Empty(), HttpStatus.OK);
+            }
         }
-        repository.put(user);
-        return new ResponseEntity<>(new Empty(), HttpStatus.OK);
+
     }
 
     @RequestMapping(value = "users/{id}" , method = RequestMethod.POST)
